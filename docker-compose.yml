@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "2020:2020"
+    environment:
+      - SERVER_PORT=2020
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/mi_basedatos?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=1234
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_DATABASE=mi_basedatos
+      - MYSQL_ROOT_PASSWORD=1234
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 10
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin_proyecto
+    restart: always
+    ports:
+      - "8096:80"
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=mysql
+      - PMA_PORT=3306
+      - PMA_SECRET=c3Ryb25nX2Jsb3dmaXNoX3NlY3JldF8zMl9jaGFyc19sb25n
+      - UPLOAD_LIMIT=300M
+
+volumes:
+  mysql-data:
