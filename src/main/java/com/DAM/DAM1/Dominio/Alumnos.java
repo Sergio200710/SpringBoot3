@@ -1,5 +1,6 @@
 package com.DAM.DAM1.Dominio;
 
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -9,11 +10,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@Entity
+@Table(name = "Alumnos")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Alumnos {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @NotBlank(message = "El nombre es obligatorio")
     @Size(max = 60, message = "El nombre no puede superar 60 caracteres")

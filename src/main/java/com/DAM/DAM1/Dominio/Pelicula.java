@@ -1,10 +1,6 @@
 package com.DAM.DAM1.Dominio;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -14,6 +10,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
 
 @Table(name = "Pelicula")
 @Getter
@@ -31,9 +29,17 @@ public class Pelicula {
     @Size(max = 120, message = "El titulo no puede superar 120 caracteres")
     private String titulo;
 
-    @NotBlank(message = "El director es obligatorio")
-    @Size(max = 80, message = "El director no puede superar 80 caracteres")
-    private String director;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "director_id")
+    private Director director;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "pelicula_actor",
+        joinColumns = @JoinColumn(name = "pelicula_id"),
+        inverseJoinColumns = @JoinColumn(name = "actor_id")
+    )
+    private List<Actor> actores = new ArrayList<>();
 
     @Min(value = 1888, message = "El anio no es valido")
     @Max(value = 2100, message = "El anio no es valido")

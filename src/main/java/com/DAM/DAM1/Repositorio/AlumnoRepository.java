@@ -1,8 +1,7 @@
-package com.example.Proyecto1oDAM.Repositorio;
+package com.DAM.DAM1.Repositorio;
 
-import com.example.Proyecto1oDAM.Dominio.Alumnos;
+import com.DAM.DAM1.Dominio.Alumnos;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AlumnoRepository extends JpaRepository<Alumnos, Long> {
-    Alumnos findFirstByOrderByIdAsc();
 }

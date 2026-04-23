@@ -1,36 +1,42 @@
+version: "3.9"
+
 services:
-  app:
+  api:
     build: .
     restart: on-failure
     ports:
       - "2020:2020"
     environment:
-      - SERVER_PORT=2020
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/mi_basedatos?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=1234
-      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
-      - SPRING_JPA_HIBERNATE_DIALECT=org.hibernate.dialect.MySQLDialect
+      SERVER_PORT: 2020
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/mi_basedatos?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root1234
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.MySQL8Dialect
     depends_on:
       mysql:
         condition: service_healthy
 
   mysql:
     image: mysql:8.0
+    container_name: mysql_proyecto
+    restart: always
     ports:
       - "3307:3306"
     environment:
-      - MYSQL_DATABASE=mi_basedatos
-      - MYSQL_ROOT_PASSWORD=1234
-      - MYSQL_ROOT_HOST=%
+      MYSQL_DATABASE: mi_basedatos
+      MYSQL_ROOT_PASSWORD: root1234
+    command: --default-authentication-plugin=mysql_native_password
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p1234 --silent"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot1234"]
+      interval: 5s
       timeout: 10s
       retries: 10
-      start_period: 20s
+      start_period: 30s
     volumes:
       - mysql-data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:latest
@@ -39,11 +45,11 @@ services:
     ports:
       - "8096:80"
     environment:
-      - PMA_ARBITRARY=1
-      - PMA_HOST=mysql
-      - PMA_PORT=3306
-      - PMA_SECRET=c3Ryb25nX2Jsb3dmaXNoX3NlY3JldF8zMl9jaGFyc19sb25n
-      - UPLOAD_LIMIT=300M
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+    depends_on:
+      mysql:
+        condition: service_healthy
 
 volumes:
   mysql-data:

@@ -1,39 +1,50 @@
 package com.DAM.DAM1.Controlador;
 
 import com.DAM.DAM1.Dominio.Director;
+import com.DAM.DAM1.Servicio.DirectorServicio;
 import jakarta.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/directores")
+@AllArgsConstructor
 public class DirectorController {
 
-    private final List<Director> directores = new ArrayList<>();
-    private final AtomicLong nextId = new AtomicLong(3);
+    private final DirectorServicio servicio;
 
-    public DirectorController() {
-        directores.add(new Director(1L, "Christopher Nolan", 54));
-        directores.add(new Director(2L, "Pedro Almodovar", 75));
+    @GetMapping
+    public List<Director> listar() {
+        return servicio.obtenerTodos();
     }
 
-    @GetMapping({"/director", "/directores"})
-    public List<Director> obtenerDirector() {
-        return directores;
+    @GetMapping("/{id}")
+    public ResponseEntity<Director> obtenerPorId(@PathVariable Long id) {
+        return servicio.obtenerPorId(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping({"/director", "/directores"})
-    public ResponseEntity<Director> guardarDirector(@Valid @RequestBody Director director) {
-        if (director.getId() == 0) {
-            director.setId(nextId.getAndIncrement());
+    @PostMapping
+    public ResponseEntity<Director> guardar(@Valid @RequestBody Director director) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(servicio.guardar(director));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Director> actualizar(@PathVariable Long id, @Valid @RequestBody Director director) {
+        try {
+            return ResponseEntity.ok(servicio.actualizar(id, director));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
         }
-        directores.add(director);
-        return ResponseEntity.status(HttpStatus.CREATED).body(director);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        servicio.eliminar(id);
+        return ResponseEntity.noContent().build();
     }
 }

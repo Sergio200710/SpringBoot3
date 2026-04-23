@@ -2,6 +2,9 @@ package com.DAM.DAM1;
 
 import com.DAM.DAM1.Controlador.AlumnoController;
 import com.DAM.DAM1.Controlador.GlobalExceptionHandler;
+import com.DAM.DAM1.Servicio.AlumnoServicio;
+import org.mockito.Mockito;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -13,9 +16,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class AlumnoControllerTests {
 
-    private final MockMvc mockMvc = MockMvcBuilders.standaloneSetup(new AlumnoController())
-            .setControllerAdvice(new GlobalExceptionHandler())
-            .build();
+    private AlumnoServicio alumnoServicio;
+    private MockMvc mockMvc;
+
+    @BeforeEach
+    void setUp() {
+        alumnoServicio = Mockito.mock(AlumnoServicio.class);
+        mockMvc = MockMvcBuilders.standaloneSetup(new AlumnoController(alumnoServicio))
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .build();
+    }
 
     @Test
     void laRutaMostrarAlumnoDevuelveElAlumnoEnJson() throws Exception {

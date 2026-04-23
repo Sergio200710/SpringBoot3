@@ -1,39 +1,50 @@
 package com.DAM.DAM1.Controlador;
 
 import com.DAM.DAM1.Dominio.Actor;
+import com.DAM.DAM1.Servicio.ActorServicio;
 import jakarta.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/actores")
+@AllArgsConstructor
 public class ActorController {
 
-    private final List<Actor> actores = new ArrayList<>();
-    private final AtomicLong nextId = new AtomicLong(3);
+    private final ActorServicio servicio;
 
-    public ActorController() {
-        actores.add(new Actor(1L, "Leonardo DiCaprio", "Estadounidense"));
-        actores.add(new Actor(2L, "Penelope Cruz", "Espanola"));
+    @GetMapping
+    public List<Actor> listar() {
+        return servicio.obtenerTodos();
     }
 
-    @GetMapping({"/actor", "/actores"})
-    public List<Actor> obtenerActor() {
-        return actores;
+    @GetMapping("/{id}")
+    public ResponseEntity<Actor> obtenerPorId(@PathVariable Long id) {
+        return servicio.obtenerPorId(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping({"/actor", "/actores"})
-    public ResponseEntity<Actor> guardarActor(@Valid @RequestBody Actor actor) {
-        if (actor.getId() == 0) {
-            actor.setId(nextId.getAndIncrement());
+    @PostMapping
+    public ResponseEntity<Actor> guardar(@Valid @RequestBody Actor actor) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(servicio.guardar(actor));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Actor> actualizar(@PathVariable Long id, @Valid @RequestBody Actor actor) {
+        try {
+            return ResponseEntity.ok(servicio.actualizar(id, actor));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
         }
-        actores.add(actor);
-        return ResponseEntity.status(HttpStatus.CREATED).body(actor);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        servicio.eliminar(id);
+        return ResponseEntity.noContent().build();
     }
 }
