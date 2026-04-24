@@ -29,7 +29,10 @@ class AlumnoControllerTests {
 
     @Test
     void laRutaMostrarAlumnoDevuelveElAlumnoEnJson() throws Exception {
-        mockMvc.perform(get("/mostrar-alumno"))
+        Mockito.when(alumnoServicio.obtenerPorId(1L))
+               .thenReturn(java.util.Optional.of(new com.DAM.DAM1.Dominio.Alumnos(1L, "Sergio", "Hidalgo", 18)));
+               
+        mockMvc.perform(get("/alumnos/1"))
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
                         {
@@ -42,6 +45,9 @@ class AlumnoControllerTests {
 
     @Test
     void laRutaAlumnosGuardaUnAlumnoValido() throws Exception {
+        Mockito.when(alumnoServicio.guardar(Mockito.any(com.DAM.DAM1.Dominio.Alumnos.class)))
+               .thenReturn(new com.DAM.DAM1.Dominio.Alumnos(2L, "Carlos", "Ruiz", 20));
+               
         mockMvc.perform(post("/alumnos")
                         .contentType("application/json")
                         .content("""
